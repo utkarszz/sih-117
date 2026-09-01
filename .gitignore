@@ -21,4 +21,5 @@ build/
 **/.next/
 *.log
 **/uploads/
+BACKEND_TECHNICAL_GUIDE.md
 

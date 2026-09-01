@@ -242,6 +242,7 @@ function AIWorkspace() {
 							}
 						: msg
 				)
+			);
 		}
 	}
 
