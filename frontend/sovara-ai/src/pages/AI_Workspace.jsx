@@ -85,6 +85,7 @@ function AIWorkspace() {
 				console.error("[AIWorkspace] Error loading workspace data:", err.message);
 			}
 		}
+
 		fetchWorkspaceData();
 	}, [activeProject]);
 
@@ -128,11 +129,11 @@ function AIWorkspace() {
 					prev.map((msg) =>
 						msg.id === pendingAstId
 							? {
-									id: pendingAstId,
-									role: "assistant",
-									isError: true,
-									text: "No document attached or available in this project. Please attach a document (using the Paperclip icon) to run analysis.",
-								}
+								id: pendingAstId,
+								role: "assistant",
+								isError: true,
+								text: "No document attached or available in this project. Please attach a document (using the Paperclip icon) to run analysis.",
+							}
 							: msg
 					)
 				);
@@ -174,13 +175,13 @@ function AIWorkspace() {
 							prev.map((msg) =>
 								msg.id === pendingAstId
 									? {
-											id: pendingAstId,
-											role: "assistant",
-											loading: false,
-											text: answerText,
-											sources: updatedDoc.result?.sources || [],
-											agentPlan: updatedDoc.agentPlan,
-										}
+										id: pendingAstId,
+										role: "assistant",
+										loading: false,
+										text: answerText,
+										sources: updatedDoc.result?.sources || [],
+										agentPlan: updatedDoc.agentPlan,
+									}
 									: msg
 							)
 						);
@@ -194,13 +195,13 @@ function AIWorkspace() {
 							prev.map((msg) =>
 								msg.id === pendingAstId
 									? {
-											id: pendingAstId,
-											role: "assistant",
-											loading: false,
-											isError: true,
-											text: `Error: ${errMsg}`,
-											agentPlan: updatedDoc.agentPlan,
-										}
+										id: pendingAstId,
+										role: "assistant",
+										loading: false,
+										isError: true,
+										text: `Error: ${errMsg}`,
+										agentPlan: updatedDoc.agentPlan,
+									}
 									: msg
 							)
 						);
@@ -213,12 +214,12 @@ function AIWorkspace() {
 							prev.map((msg) =>
 								msg.id === pendingAstId
 									? {
-											id: pendingAstId,
-											role: "assistant",
-											loading: false,
-											isError: true,
-											text: "Request timed out waiting for backend analysis worker.",
-										}
+										id: pendingAstId,
+										role: "assistant",
+										loading: false,
+										isError: true,
+										text: "Request timed out waiting for backend analysis worker.",
+									}
 									: msg
 							)
 						);
@@ -234,12 +235,12 @@ function AIWorkspace() {
 				prev.map((msg) =>
 					msg.id === pendingAstId
 						? {
-								id: pendingAstId,
-								role: "assistant",
-								loading: false,
-								isError: true,
-								text: `Failed to initiate analysis request: ${err.message}`,
-							}
+							id: pendingAstId,
+							role: "assistant",
+							loading: false,
+							isError: true,
+							text: `Failed to initiate analysis request: ${err.message}`,
+						}
 						: msg
 				)
 			);
@@ -333,9 +334,11 @@ function AIWorkspace() {
 						if (msg.role === "user") {
 							return <div key={msg.id} className="user-message follow-up">{msg.text}</div>;
 						}
+
 						if (msg.loading) {
 							return <ChatLoading key={msg.id} />;
 						}
+
 						if (msg.isError) {
 							return (
 								<div key={msg.id} className="assistant-message error-message" style={{ borderLeft: "3px solid #ef4444", backgroundColor: "rgba(239, 68, 68, 0.08)" }}>
@@ -346,6 +349,7 @@ function AIWorkspace() {
 								</div>
 							);
 						}
+
 						return (
 							<div key={msg.id} className="assistant-message">
 								<p style={{ whiteSpace: "pre-wrap" }}>{msg.text}</p>
@@ -372,6 +376,7 @@ function AIWorkspace() {
 						placeholder={loading ? "Sovara AI is processing query against RAG pipeline..." : "Direct the analysis..."}
 						rows="3"
 					/>
+
 					<div className="composer-toolbar">
 						<div>
 							<label className="composer-tool-button">
@@ -389,6 +394,7 @@ function AIWorkspace() {
 								/>
 								<Paperclip size={15} /> {attachmentName || "Attach"}
 							</label>
+
 							<button
 								type="button"
 								disabled={loading}
@@ -396,6 +402,7 @@ function AIWorkspace() {
 							>
 								<BookOpen size={15} /> Knowledge
 							</button>
+
 							<button
 								type="button"
 								disabled={loading}
@@ -404,6 +411,7 @@ function AIWorkspace() {
 								<Wrench size={15} /> Tools
 							</button>
 						</div>
+
 						<button className="send-button" disabled={loading} type="submit" aria-label="Send prompt">
 							<Send size={17} />
 						</button>
@@ -413,6 +421,7 @@ function AIWorkspace() {
 
 			<aside className="workspace-trace">
 				<p className="workspace-label">Trace &amp; sources</p>
+
 				<div className="trace-list">
 					{traceSteps.map((step, idx) => (
 						<TraceItem
@@ -423,6 +432,7 @@ function AIWorkspace() {
 						/>
 					))}
 				</div>
+
 				<div className="source-list">
 					{sourcesList.length === 0 ? (
 						<p style={{ fontSize: "11px", color: "#8f7768", padding: "12px 0" }}>No sources loaded for this session.</p>
@@ -467,4 +477,3 @@ function TraceItem({ text, done, active }) {
 }
 
 export default AIWorkspace;
-
