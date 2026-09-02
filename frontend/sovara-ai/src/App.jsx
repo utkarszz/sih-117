@@ -3,6 +3,9 @@ import Header from "./components/static/Header";
 import Sidebar from "./components/static/Sidebar";
 import { useAuth } from "./context/AuthContext";
 
+// Auth
+import Login from "./pages/Login";
+
 // Dashboard
 import Dashboard from "./pages/Dashboard";
 import Workspace from "./pages/AI_Workspace";
@@ -19,7 +22,7 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 
 function App() {
-  const { loading, error } = useAuth();
+  const { user, loading, error } = useAuth();
 
   if (loading) {
     return (
@@ -52,24 +55,13 @@ function App() {
     );
   }
 
-  if (error) {
+  // If user is not logged in, show Login view
+  if (!user) {
     return (
-      <div style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        background: "#171310",
-        color: "#ef8e84",
-        padding: "24px",
-        textAlign: "center",
-        fontFamily: "'JetBrains Mono', monospace"
-      }}>
-        <h2 style={{ color: "#ef8e84", margin: "0 0 12px 0", fontSize: "18px" }}>Enclave Connection Failed</h2>
-        <p style={{ color: "#dbc2b2", fontSize: "14px", maxWidth: "480px", margin: "0 0 20px 0" }}>{error}</p>
-        <p style={{ color: "#8f7768", fontSize: "12px" }}>Ensure the Node.js backend is running at http://localhost:5000 and the MongoDB database is accessible.</p>
-      </div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
     );
   }
 
@@ -79,80 +71,78 @@ function App() {
       <div className="app-main">
         <Header />
         <Routes>
+          {/* Unauthenticated redirect if already logged in */}
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
 
-        {/* =========================
-            DASHBOARD
-        ========================= */}
+          {/* =========================
+              DASHBOARD
+          ========================= */}
 
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
 
-        <Route
-          path="/dashboard/workspace"
-          element={<Workspace />}
-        />
+          <Route
+            path="/dashboard/workspace"
+            element={<Workspace />}
+          />
 
-        <Route
-          path="/dashboard/tasks"
-          element={<Tasks />}
-        />
+          <Route
+            path="/dashboard/tasks"
+            element={<Tasks />}
+          />
 
-        <Route
-          path="/dashboard/knowledge"
-          element={<Knowledge />}
-        />
+          <Route
+            path="/dashboard/knowledge"
+            element={<Knowledge />}
+          />
 
+          {/* =========================
+              OTHER PAGES
+          ========================= */}
 
-        {/* =========================
-            OTHER PAGES
-        ========================= */}
+          <Route
+            path="/approvals"
+            element={<Approvals />}
+          />
 
-        <Route
-          path="/approvals"
-          element={<Approvals />}
-        />
+          <Route
+            path="/deliverables"
+            element={<Deliverables />}
+          />
 
-        <Route
-          path="/deliverables"
-          element={<Deliverables />}
-        />
+          <Route
+            path="/documents"
+            element={<Documents />}
+          />
 
-        <Route
-          path="/documents"
-          element={<Documents />}
-        />
+          <Route
+            path="/security"
+            element={<SecurityCenter />}
+          />
 
-        <Route
-          path="/security"
-          element={<SecurityCenter />}
-        />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/notifications" element={<Notifications />} />
 
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/notifications" element={<Notifications />} />
+          {/* =========================
+              DEFAULT ROUTE
+          ========================= */}
 
+          <Route
+            path="/"
+            element={<Navigate to="/dashboard" replace />}
+          />
 
-        {/* =========================
-            DEFAULT ROUTE
-        ========================= */}
+          {/* =========================
+              404 / UNKNOWN ROUTE
+          ========================= */}
 
-        <Route
-          path="/"
-          element={<Navigate to="/dashboard" replace />}
-        />
-
-
-        {/* =========================
-            404 / UNKNOWN ROUTE
-        ========================= */}
-
-        <Route
-          path="*"
-          element={<Navigate to="/dashboard" replace />}
-        />
-
+          <Route
+            path="*"
+            element={<Navigate to="/dashboard" replace />}
+          />
         </Routes>
       </div>
     </div>
