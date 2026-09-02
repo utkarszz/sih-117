@@ -12,17 +12,10 @@ import {
 
 const AuthContext = createContext(null);
 
-/**
- * Seed credentials — the app auto-logs in on mount if no token is stored.
- * This removes the need for a Login page during development.
- */
-const SEED_EMAIL = "admin@example.com";
-const SEED_PASSWORD = "SystemAdmin@2026";
-
 export function AuthProvider({ children }) {
   const [user, _setUser] = useState(() => getUser());
   const [token, _setToken] = useState(() => getToken());
-  const [loading, setLoading] = useState(!getToken()); // only show loading if we need to auto-login
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Active project for project-scoped API calls
@@ -44,61 +37,67 @@ export function AuthProvider({ children }) {
     setActiveProject(null);
   }
 
-  // Auto-login on mount if there is no token
+  async function login(email, password) {
+    setError(null);
+    try {
+      const res = await authAPI.login(email, password);
+      if (res.success && res.data) {
+        persistAuth(res.data.user, res.data.token);
+
+        // Fetch user projects for project-scoped actions
+        try {
+          const projRes = await projectsAPI.list();
+          const projects = projRes.data?.projects || projRes.data || [];
+          if (projects.length > 0) setActiveProject(projects[0]);
+        } catch (pErr) {
+          console.warn("[AuthContext] Projects fetch warning:", pErr.message);
+        }
+        return res.data;
+      } else {
+        throw new Error(res.message || "Login failed");
+      }
+    } catch (err) {
+      setError(err.message || "Login failed");
+      throw err;
+    }
+  }
+
+  // Check auth state on mount
   useEffect(() => {
-    async function autoLogin() {
-      // If we already have a token, verify it is still valid by trying a protected call
+    async function checkAuth() {
       const existingToken = getToken();
       if (existingToken) {
         try {
           const res = await projectsAPI.list();
           if (res.success) {
-            // Token still good — pick the first project as active
             const projects = res.data?.projects || res.data || [];
             if (projects.length > 0) setActiveProject(projects[0]);
             setLoading(false);
             return;
           }
         } catch {
-          // Token expired or invalid — fall through to re-login
+          // Token expired or invalid
           clearToken();
           clearUser();
+          _setToken(null);
+          _setUser(null);
         }
       }
-
-      // No valid token — login with seed credentials
-      try {
-        const res = await authAPI.login(SEED_EMAIL, SEED_PASSWORD);
-        if (res.success && res.data) {
-          persistAuth(res.data.user, res.data.token);
-
-          // Fetch projects so pages that need a projectId can use it
-          try {
-            const projRes = await projectsAPI.list();
-            const projects = projRes.data?.projects || projRes.data || [];
-            if (projects.length > 0) setActiveProject(projects[0]);
-          } catch {
-            // projects fetch failed — non-fatal
-          }
-        }
-      } catch (err) {
-        console.error("[AuthContext] Auto-login failed:", err.message);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(false);
     }
 
-    autoLogin();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    checkAuth();
+  }, []);
 
   const value = {
     user,
     token,
     loading,
     error,
+    setError,
     activeProject,
     setActiveProject,
+    login,
     logout,
     isAdmin: user?.role === "ADMIN",
     isSupervisor: user?.role === "SUPERVISOR",
@@ -112,3 +111,4 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
 }
+

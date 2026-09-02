@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, UserRound } from "lucide-react";
+import { Bell, UserRound, LogOut } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { notificationsAPI } from "../../services/api";
 
 function Header() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
   const pageNames = {
@@ -78,7 +78,20 @@ function Header() {
           </Link>
 
           {/* Profile */}
-          <Link className="profile-button" to="/profile" aria-label="Profile" title={user?.name || "Profile"}><UserRound size={17} /></Link>
+          <Link className="profile-button" to="/profile" aria-label="Profile" title={user?.name ? `${user.name} (${user.role})` : "Profile"}>
+            <UserRound size={17} />
+          </Link>
+
+          {/* Logout */}
+          <button
+            className="header-icon-button"
+            onClick={logout}
+            aria-label="Logout"
+            title="Log Out"
+            style={{ background: "none", border: "none", cursor: "pointer", color: "#ef8e84" }}
+          >
+            <LogOut size={17} />
+          </button>
 
         </div>
       </div>
